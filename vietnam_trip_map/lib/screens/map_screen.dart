@@ -77,8 +77,8 @@ class _MapScreenState extends State<MapScreen> {
       showDialog(
         context: context,
         builder: (context) => AddPinDialog(
-          latitude: center.coordinates.lat,
-          longitude: center.coordinates.lng,
+          latitude: center.coordinates.lat.toDouble(),
+          longitude: center.coordinates.lng.toDouble(),
           onPinAdded: (pin) async {
             final newPin = await _supabaseService.addPin(pin);
             if (newPin != null) {
