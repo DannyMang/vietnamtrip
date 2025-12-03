@@ -37,6 +37,7 @@ dependencies:
 
   # Map
   mapbox_maps_flutter: ^2.3.0
+  mapbox_search: ^4.0.0
 
   # Database
   supabase_flutter: ^2.5.0

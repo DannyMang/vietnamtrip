@@ -62,7 +62,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 24),
                   Text(
                     'Vietnam Trip',
-                    style: GoogleFonts.pacifico(
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.pacifico().fontFamily,
                       fontSize: 48,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -71,7 +72,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'Plan Your Adventure',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.poppins().fontFamily,
                       fontSize: 18,
                       color: Colors.white.withOpacity(0.9),
                     ),
@@ -94,7 +96,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       children: [
                         Text(
                           'Welcome!',
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade800,
@@ -113,7 +116,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             fillColor: Colors.grey.shade50,
                           ),
                           textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _signIn(),
                         ),
                         const SizedBox(height: 24),
                         SizedBox(
@@ -131,7 +133,8 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                             child: Text(
                               'Start Exploring',
-                              style: GoogleFonts.poppins(
+                              style: TextStyle(
+                                fontFamily: GoogleFonts.poppins().fontFamily,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),

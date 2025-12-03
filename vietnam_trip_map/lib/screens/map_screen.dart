@@ -55,11 +55,28 @@ class _MapScreenState extends State<MapScreen> {
       final options = PointAnnotationOptions(
         geometry: point,
         textField: pin.type.emoji,
-        textSize: 24,
-        iconSize: 1.5,
+        textSize: 28,
+        textColor: _getTypeColor(pin.type).value,
+        textHaloColor: Colors.white.value,
+        textHaloWidth: 2.0,
       );
 
       await _pointAnnotationManager!.create(options);
+    }
+  }
+
+  Color _getTypeColor(PinType type) {
+    switch (type) {
+      case PinType.shopping:
+        return Colors.pink.shade700;
+      case PinType.activity:
+        return Colors.purple.shade700;
+      case PinType.food:
+        return Colors.orange.shade700;
+      case PinType.beauty:
+        return Colors.pink.shade700;
+      case PinType.hotel:
+        return Colors.blue.shade700;
     }
   }
 
@@ -69,30 +86,22 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showAddPinDialog() {
-    if (_mapboxMap == null) return;
-
-    _mapboxMap!.getCameraState().then((cameraState) {
-      final center = cameraState.center;
-
-      showDialog(
-        context: context,
-        builder: (context) => AddPinDialog(
-          latitude: center.coordinates.lat.toDouble(),
-          longitude: center.coordinates.lng.toDouble(),
-          onPinAdded: (pin) async {
-            final newPin = await _supabaseService.addPin(pin);
-            if (newPin != null) {
-              await _loadPins();
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pin added successfully!')),
-                );
-              }
+    showDialog(
+      context: context,
+      builder: (context) => AddPinDialog(
+        onPinAdded: (pin) async {
+          final newPin = await _supabaseService.addPin(pin);
+          if (newPin != null) {
+            await _loadPins();
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Pin added successfully!')),
+              );
             }
-          },
-        ),
-      );
-    });
+          }
+        },
+      ),
+    );
   }
 
   void _showPinsList() {

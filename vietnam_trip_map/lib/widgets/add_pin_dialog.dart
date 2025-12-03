@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart' hide Color;
+import 'package:flutter/material.dart' as material show Color;
+import 'package:mapbox_search/mapbox_search.dart';
+import 'location_search_widget.dart';
 import '../models/pin.dart';
 
 class AddPinDialog extends StatefulWidget {
-  final double latitude;
-  final double longitude;
   final Function(Pin) onPinAdded;
 
   const AddPinDialog({
     super.key,
-    required this.latitude,
-    required this.longitude,
     required this.onPinAdded,
   });
 
@@ -22,6 +20,7 @@ class _AddPinDialogState extends State<AddPinDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   PinType _selectedType = PinType.activity;
+  MapBoxPlace? _selectedLocation;
 
   @override
   void dispose() {
@@ -31,18 +30,24 @@ class _AddPinDialogState extends State<AddPinDialog> {
   }
 
   void _submit() {
-    if (_titleController.text.trim().isEmpty) {
+    if (_selectedLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a title')),
+        const SnackBar(content: Text('Please search and select a location')),
       );
       return;
     }
 
+    final title = _titleController.text.trim().isEmpty
+        ? _selectedLocation!.placeName ?? 'Unknown Place'
+        : _titleController.text.trim();
+
+    final coords = _selectedLocation!.geometry!.coordinates!;
+
     final pin = Pin(
-      title: _titleController.text.trim(),
+      title: title,
       description: _descriptionController.text.trim(),
-      latitude: widget.latitude,
-      longitude: widget.longitude,
+      latitude: coords.lat,
+      longitude: coords.long,
       type: _selectedType,
     );
 
@@ -65,9 +70,9 @@ class _AddPinDialogState extends State<AddPinDialog> {
             children: [
               Row(
                 children: [
-                  Text(
+                  const Text(
                     'Add New Place',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -80,12 +85,60 @@ class _AddPinDialogState extends State<AddPinDialog> {
                 ],
               ),
               const SizedBox(height: 24),
-              Text(
-                'Category',
-                style: GoogleFonts.poppins(
+              const Text(
+                'Search Location',
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 12),
+              LocationSearchWidget(
+                onLocationSelected: (place) {
+                  setState(() {
+                    _selectedLocation = place;
+                    if (_titleController.text.trim().isEmpty) {
+                      _titleController.text = place.placeName ?? '';
+                    }
+                  });
+                },
+              ),
+              if (_selectedLocation != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _selectedLocation!.placeName ?? 'Location selected',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green.shade700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              const Text(
+                'Category',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 12),
@@ -100,17 +153,14 @@ class _AddPinDialogState extends State<AddPinDialog> {
                       children: [
                         Text(type.emoji),
                         const SizedBox(width: 4),
-                        Text(
-                          type.value,
-                          style: GoogleFonts.poppins(),
-                        ),
+                        Text(type.value),
                       ],
                     ),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() => _selectedType = type);
                     },
-                    selectedColor: Colors.orange.shade200,
+                    selectedColor: _getTypeColor(type),
                     backgroundColor: Colors.grey.shade100,
                   );
                 }).toList(),
@@ -119,8 +169,8 @@ class _AddPinDialogState extends State<AddPinDialog> {
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g., Haga Shoes',
+                  labelText: 'Title (optional)',
+                  hintText: 'Custom name for this place',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -133,7 +183,7 @@ class _AddPinDialogState extends State<AddPinDialog> {
               TextField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: 'Description (optional)',
+                  labelText: 'Notes (optional)',
                   hintText: 'Add notes about this place...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -157,9 +207,9 @@ class _AddPinDialogState extends State<AddPinDialog> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Add Place',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -171,5 +221,20 @@ class _AddPinDialogState extends State<AddPinDialog> {
         ),
       ),
     );
+  }
+
+  Color _getTypeColor(PinType type) {
+    switch (type) {
+      case PinType.shopping:
+        return Colors.pink.shade200;
+      case PinType.activity:
+        return Colors.purple.shade200;
+      case PinType.food:
+        return Colors.orange.shade200;
+      case PinType.beauty:
+        return Colors.pink.shade200;
+      case PinType.hotel:
+        return Colors.blue.shade200;
+    }
   }
 }

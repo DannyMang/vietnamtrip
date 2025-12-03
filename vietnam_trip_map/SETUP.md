@@ -58,7 +58,12 @@ CREATE POLICY "Allow all operations" ON pins
 
 ### 3. Configure the App
 
-Open `lib/config/app_config.dart` and replace the placeholder values:
+1. Copy the example config file:
+```bash
+cp lib/config/app_config.example.dart lib/config/app_config.dart
+```
+
+2. Open `lib/config/app_config.dart` and replace the placeholder values:
 
 ```dart
 class AppConfig {
